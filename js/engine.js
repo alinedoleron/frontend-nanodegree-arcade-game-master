@@ -22,12 +22,27 @@ var Engine = (function(global) {
     var doc = global.document,
         win = global.window,
         canvas = doc.createElement('canvas'),
+        canvasIntro = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
+        ctxIntro = canvasIntro.getContext('2d'),
+        character = "",
+        myReq,
         lastTime;
 
+    canvas.id = "canvas";
+    canvasIntro.id = "canvasIntro"
     canvas.width = 505;
     canvas.height = 606;
-    doc.body.appendChild(canvas);
+    canvasIntro.width = 505;
+    canvasIntro.height = 606;
+    doc.body.appendChild(canvasIntro);
+
+    $("#scorePlace").css('visibility', 'hidden');
+    let newGame = document.getElementById("newGame");
+        newGame.addEventListener('click', function() {
+           character = "";
+           init();
+           }); 
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
@@ -39,24 +54,23 @@ var Engine = (function(global) {
          * would be the same for everyone (regardless of how fast their
          * computer is) - hurray time!
          */
-        var now = Date.now(),
-            dt = (now - lastTime) / 1000.0;
-
+         var now = Date.now(),
+             dt = (now - lastTime) / 1000.0;
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-        update(dt);
-        render();
+         update(dt);
+         render();
 
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
          */
-        lastTime = now;
+         lastTime = now;   
 
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
-        win.requestAnimationFrame(main);
+         myReq = win.requestAnimationFrame(main);
     }
 
     /* This function does some initial setup that should only occur once,
@@ -64,9 +78,57 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
+        canvasIntro.addEventListener('click', onclick, false);
+
         reset();
         lastTime = Date.now();
-        main();
+    }
+
+
+
+    function onclick(e) {
+        let posX = e.pageX,
+        posY = e.pageY,
+        border = 20,
+        xInitial = 672 + border,
+        xFinal = 608 + border;
+        leftLimit = 35 + 66,
+        rightLimit = 35;
+
+        
+        if(posY <=602 + border && posY>=526 - border) {
+            if(posX <= xInitial && posX >= xFinal) {
+                character = 'images/char-boy.png';
+            } else if(posX <=xInitial + leftLimit && posX>=xFinal + rightLimit){
+                character = 'images/char-cat-girl.png';
+            } else if(posX <=xInitial + 2*leftLimit && posX>=xFinal + 2*rightLimit) {
+                character =  'images/char-horn-girl.png';
+            } else if(posX <=xInitial + 3*leftLimit && posX>=xFinal + 3*rightLimit) {
+                character = 'images/char-pink-girl.png';
+            } else if(posX <=xInitial + 4*leftLimit && posX>=xFinal + 4*rightLimit){
+                character = 'images/char-princess-girl.png';
+            }
+            player.loadPlayer(character);
+
+            ctxIntro.fillStyle = "red";
+            ctxIntro.strokeStyle = "black"; 
+            ctxIntro.lineWidth = 1; 
+            ctxIntro.font='35px sans-serif';
+            ctxIntro.textAlign="center"; 
+            ctxIntro.fillText("START",253,390);
+            ctxIntro.strokeText("START",253,390);           
+        }
+
+            //start button
+        if(character!="") {
+            if(posX>=790 && posX<=898){
+                if(posY>=452 && posY <=478) {
+                    main();
+                }
+            }
+        } 
+        
+
     }
 
     /* This function is called by main (our game loop) and itself calls all
@@ -81,6 +143,8 @@ var Engine = (function(global) {
     function update(dt) {
         updateEntities(dt);
         checkCollisions();
+        checkReachWater();
+
     }
 
     /* This is called by the update function and loops through all of the
@@ -110,6 +174,9 @@ var Engine = (function(global) {
         /* This array holds the relative URL to the image used
          * for that particular row of the game level.
          */
+        $("#canvasIntro").remove();
+        $("#scorePlace").css('visibility', 'visible');
+        doc.body.appendChild(canvas);
         var rowImages = [
                 'images/water-block.png',   // Top row is water
                 'images/stone-block.png',   // Row 1 of 3 of stone
@@ -139,6 +206,8 @@ var Engine = (function(global) {
             }
         }
 
+          
+        
         renderEntities();
     }
 
@@ -162,7 +231,61 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        resetScore();
+        $("#scorePlace").css('visibility', 'hidden');
+        win.cancelAnimationFrame(myReq);
+        $("#canvas").remove();
+        doc.body.appendChild(canvasIntro);
+        var rowImages = [
+                'images/water-block.png',   // Top row is water
+                'images/stone-block.png',   // Row 1 of 3 of stone
+                'images/stone-block.png',   // Row 2 of 3 of stone
+                'images/stone-block.png',   // Row 3 of 3 of stone
+                'images/grass-block.png',   // Row 1 of 2 of grass
+                'images/grass-block.png'    // Row 2 of 2 of grass
+            ],
+            rowCharacters = [
+                'images/char-boy.png',
+                'images/char-cat-girl.png',
+                'images/char-horn-girl.png',
+                'images/char-pink-girl.png',
+                'images/char-princess-girl.png'
+            ],
+            numRows = 6,
+            numCols = 5,
+            row, col;
+
+
+        /* Loop through the number of rows and columns we've defined above
+         * and, using the rowImages array, draw the correct image for that
+         * portion of the "grid"
+         */
+        for (row = 0; row < numRows; row++) {
+            for (col = 0; col < numCols; col++) {
+                /* The drawImage function of the canvas' context element
+                 * requires 3 parameters: the image to draw, the x coordinate
+                 * to start drawing and the y coordinate to start drawing.
+                 * We're using our Resources helpers to refer to our images
+                 * so that we get the benefits of caching these images, since
+                 * we're using them over and over.
+                 */
+                ctxIntro.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+            }
+            ctxIntro.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+        }
+
+        for (col = 0; col < numCols; col++) {        
+                ctxIntro.drawImage(Resources.get(rowCharacters[col]), col * 101, 5 * 75);
+        }
+
+        ctxIntro.fillStyle = "black";
+        ctxIntro.strokeStyle = "white"; 
+        ctxIntro.lineWidth = 1; 
+        ctxIntro.font='45px sans-serif';
+        ctxIntro.textAlign="center"; 
+        ctxIntro.fillText("Choose your character:",253,230);
+        ctxIntro.strokeText("Choose your character:",253,230);
+         
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -174,7 +297,12 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+        'images/char-cat-girl.png',
+        'images/char-horn-girl.png',
+        'images/char-pink-girl.png',
+        'images/char-princess-girl.png'
+        
     ]);
     Resources.onReady(init);
 
@@ -183,4 +311,6 @@ var Engine = (function(global) {
      * from within their app.js files.
      */
     global.ctx = ctx;
+    global.ctxIntro = ctxIntro;
+   
 })(this);

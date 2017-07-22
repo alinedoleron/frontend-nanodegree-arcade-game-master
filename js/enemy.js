@@ -23,7 +23,7 @@ class Enemy {
         this.x += this.speed * dt;
         if(this.x >=  this.finalPosition) {
             this.x = this.initPosition;
-            this.speed = Math.random() * this.finalPosition + 250; 
+            this.speed = Math.random() * this.finalPosition + 50; 
         }
     }
 
