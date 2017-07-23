@@ -4,17 +4,13 @@ class Player {
         this.y = 370;
         this.score = 0;
         this.sprite = '';
+        this.scoreDefaut = 1;
     }
 
     renderScore() {
         var doc = window.document;
         var span = doc.getElementById('score');
         span.innerHTML = this.score;
-    }
-
-    loadPlayer(character) {
-        this.sprite = character;
-        ctxIntro.drawImage(Resources.get(this.sprite), 200, 210);
     }
  
     render() {
@@ -27,13 +23,18 @@ class Player {
         this.update();
     }
 
-    increment() {
-        this.score += 1;
-        this.update();
+    increment(score = this.scoreDefaut) {
+        console.log("this score = ", score);
+        this.score += score;
+        if(score == this.scoreDefaut) {
+            this.update();
+        } else {
+            this.renderScore();
+        }
+        
     }
 
     update() {
-        var doc = window.document;
         this.x = Math.floor(Math.random() * 5) * 100;
         this.y = 370;
         this.render();
@@ -42,7 +43,6 @@ class Player {
     handleInput(keyCode) {
         switch(keyCode) {
             case 'left': {
-                
                 if(this.x - 100 >= 0) {
                     this.x -= 100;
                 } 
@@ -56,6 +56,7 @@ class Player {
                 break;
             }
             case 'up': {
+                console.log("up");
                 if(this.y - 80 >= -30) {
                     this.y -= 80;
                 }

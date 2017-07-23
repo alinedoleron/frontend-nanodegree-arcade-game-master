@@ -19,15 +19,21 @@ var Engine = (function(global) {
      * create the canvas element, grab the 2D context for that canvas
      * set the canvas elements height/width and add it to the DOM.
      */
-    var doc = global.document,
+    let doc = global.document,
         win = global.window,
         canvas = doc.createElement('canvas'),
         canvasIntro = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
         ctxIntro = canvasIntro.getContext('2d'),
-        character = "",
+        character = [""],
         myReq,
         lastTime;
+
+    ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
+    ctxIntro.canvas.width  = window.innerWidth;
+    ctxIntro.canvas.height = window.innerHeight;
+
 
     canvas.id = "canvas";
     canvasIntro.id = "canvasIntro"
@@ -40,10 +46,20 @@ var Engine = (function(global) {
     $("#scorePlace").css('visibility', 'hidden');
     let newGame = document.getElementById("newGame");
         newGame.addEventListener('click', function() {
-           character = "";
+           character[0] = "";
            init();
            }); 
 
+    doc.addEventListener('resize', resizeCanvas, false);
+
+            
+    function resizeCanvas() {
+        console.log("canva resise");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+                   
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
@@ -54,13 +70,26 @@ var Engine = (function(global) {
          * would be the same for everyone (regardless of how fast their
          * computer is) - hurray time!
          */
+
+        //  console.log("main");
          var now = Date.now(),
              dt = (now - lastTime) / 1000.0;
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
-         update(dt);
-         render();
+         
+         
+        
+         if(character[0] != "") {
+            //call the game
+            // console.log("call the game");
+            render();
+            update(dt);
+         } else {
+            //go to intro screen
+            reset();
+         }
+            
 
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
@@ -78,57 +107,11 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
-        canvasIntro.addEventListener('click', onclick, false);
+        //canvasIntro.addEventListener('click', onclick, false);
 
         reset();
         lastTime = Date.now();
-    }
-
-
-
-    function onclick(e) {
-        let posX = e.pageX,
-        posY = e.pageY,
-        border = 20,
-        xInitial = 672 + border,
-        xFinal = 608 + border;
-        leftLimit = 35 + 66,
-        rightLimit = 35;
-
-        
-        if(posY <=602 + border && posY>=526 - border) {
-            if(posX <= xInitial && posX >= xFinal) {
-                character = 'images/char-boy.png';
-            } else if(posX <=xInitial + leftLimit && posX>=xFinal + rightLimit){
-                character = 'images/char-cat-girl.png';
-            } else if(posX <=xInitial + 2*leftLimit && posX>=xFinal + 2*rightLimit) {
-                character =  'images/char-horn-girl.png';
-            } else if(posX <=xInitial + 3*leftLimit && posX>=xFinal + 3*rightLimit) {
-                character = 'images/char-pink-girl.png';
-            } else if(posX <=xInitial + 4*leftLimit && posX>=xFinal + 4*rightLimit){
-                character = 'images/char-princess-girl.png';
-            }
-            player.loadPlayer(character);
-
-            ctxIntro.fillStyle = "red";
-            ctxIntro.strokeStyle = "black"; 
-            ctxIntro.lineWidth = 1; 
-            ctxIntro.font='35px sans-serif';
-            ctxIntro.textAlign="center"; 
-            ctxIntro.fillText("START",253,390);
-            ctxIntro.strokeText("START",253,390);           
-        }
-
-            //start button
-        if(character!="") {
-            if(posX>=790 && posX<=898){
-                if(posY>=452 && posY <=478) {
-                    main();
-                }
-            }
-        } 
-        
-
+        main();
     }
 
     /* This function is called by main (our game loop) and itself calls all
@@ -141,9 +124,12 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
+        checkNumOfGems();
         updateEntities(dt);
         checkCollisions();
+        checkGemCatch();
         checkReachWater();
+        
 
     }
 
@@ -159,9 +145,9 @@ var Engine = (function(global) {
             allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
+
+        selector.render();
         
-        
-        //  player.update();
     }
 
     /* This function initially draws the "game level", it will then call
@@ -206,8 +192,6 @@ var Engine = (function(global) {
             }
         }
 
-          
-        
         renderEntities();
     }
 
@@ -219,11 +203,15 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
-         allEnemies.forEach(function(enemy) {
+        allGems.forEach(function(gem) {
+             gem.render();
+         });
+        allEnemies.forEach(function(enemy) {
              enemy.render();
          });
-
-        player.render();
+        
+        player.render(character[0]);
+        
     }
 
     /* This function does nothing but it could have been a good place to
@@ -285,7 +273,10 @@ var Engine = (function(global) {
         ctxIntro.textAlign="center"; 
         ctxIntro.fillText("Choose your character:",253,230);
         ctxIntro.strokeText("Choose your character:",253,230);
-         
+        selector.render();
+
+        
+        
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -301,7 +292,12 @@ var Engine = (function(global) {
         'images/char-cat-girl.png',
         'images/char-horn-girl.png',
         'images/char-pink-girl.png',
-        'images/char-princess-girl.png'
+        'images/char-princess-girl.png',
+        'images/Gem Blue.png',
+        'images/Gem Green.png',
+        'images/Gem Orange.png',
+        'images/Heart.png',
+        'images/square.png'
         
     ]);
     Resources.onReady(init);
@@ -312,5 +308,6 @@ var Engine = (function(global) {
      */
     global.ctx = ctx;
     global.ctxIntro = ctxIntro;
+    global.character = character;
    
 })(this);
