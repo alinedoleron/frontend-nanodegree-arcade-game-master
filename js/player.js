@@ -1,5 +1,5 @@
 //score got when player wins(reach the water)
-const scoreDefaut = 100;
+const SCORE_DEFAULT = 100;
 
 //Class Player
 class Player {
@@ -37,7 +37,7 @@ class Player {
     }
 
     //increment the score
-    increment(score = scoreDefaut) {
+    increment(score = SCORE_DEFAULT) {
         this.score += score;
             this.renderScore();       
     }
@@ -82,7 +82,7 @@ class Player {
                 } else {
                     //if Y == -30 player reach water
                     this.swim ++;
-                    this.score += scoreDefaut;
+                    this.score += SCORE_DEFAULT;
                     this.update();
                     if(this.swim >= MAX_SWIM) {
                         this.playerWin();
