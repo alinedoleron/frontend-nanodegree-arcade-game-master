@@ -1,6 +1,8 @@
 
 const MIN_GEMS = 1;
 const MAX_GEMS = 3;
+const MAX_SWIM = 5;
+
 // array with the possibilities of gems
 let gems = [
     {
@@ -54,21 +56,15 @@ function createGem() {
         gemSprite = gems[gemKind].sprite,
         gemValue = gems[gemKind].value;
 
-    // console.log("numOfGems = " + numOfGems);
     allGems.push(new Gem(gemPosX, gemPosY, gemSprite, gemValue));
     numOfGems++;
 }
 
 //check if a player collided with an enemy
 function checkGemCatch() {
-    // console.log("check gem");
         allGems.forEach(function(gem) {
-            console.log("Gem X: " + gem.x + " Player X: " + player.x );
-            console.log("Gem Y: " + gem.y + " Player Y: " + player.y );
             if (gem.x <= player.x + 18 && 18 + gem.x >= player.x &&
-                ((gem.y - player.y) >= 68 && (gem.y - player.y) <= 82)) {
-                console.log("for  " + gem.sprite);
-                console.log("for  " + gem.vlue);              
+                ((gem.y - player.y) >= 68 && (gem.y - player.y) <= 82)) {          
                 player.increment(gem.value);
                 gem.remove();
                 numOfGems--;
@@ -89,18 +85,21 @@ function checkCollisions() {
     }, this);
 }
 
-//check id player reached the water
-function checkReachWater() {
-    allEnemies.forEach(function(e) {
-        if (player.y === -30) {
-            player.increment();
-        }
-    }, this);
-}
 
 //reset the score of the game
 function resetScore() {
     player.score = 0;
+}
+
+//check if player won
+function checkPlayerWin() {
+    if(player.swim >= MAX_SWIM) {
+        player.playerWin();
+        return true;
+    } 
+    return false;
+    
+    
 }
 
 // This listens for key presses and sends the keys to your
@@ -116,15 +115,16 @@ document.addEventListener('keyup', function(e) {
     };
 
     if(character == '') {
-        console.log("selector");
         selector.handleInput(allowedKeys[e.keyCode]);
     } else {
-        console.log("player");
         player.handleInput(allowedKeys[e.keyCode]);
     }
     
     
 });
+
+
+
 
 
 

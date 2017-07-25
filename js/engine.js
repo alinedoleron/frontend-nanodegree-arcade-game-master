@@ -27,6 +27,7 @@ var Engine = (function(global) {
         ctxIntro = canvasIntro.getContext('2d'),
         character = [""],
         myReq,
+        gameEnd = false,
         lastTime;
 
     ctx.canvas.width  = window.innerWidth;
@@ -41,25 +42,19 @@ var Engine = (function(global) {
     canvas.height = 606;
     canvasIntro.width = 505;
     canvasIntro.height = 606;
-    doc.body.appendChild(canvasIntro);
 
-    $("#scorePlace").css('visibility', 'hidden');
+
+    // This listens for newGame button clicks and initiate a new game 
     let newGame = document.getElementById("newGame");
         newGame.addEventListener('click', function() {
            character[0] = "";
+           gameEnd = false;
+           player.restorePlayerSwim();
            init();
            }); 
+    
 
-    doc.addEventListener('resize', resizeCanvas, false);
 
-            
-    function resizeCanvas() {
-        console.log("canva resise");
-
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-                   
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
@@ -71,25 +66,22 @@ var Engine = (function(global) {
          * computer is) - hurray time!
          */
 
-        //  console.log("main");
          var now = Date.now(),
              dt = (now - lastTime) / 1000.0;
         /* Call our update/render functions, pass along the time delta to
          * our update function since it may be used for smooth animation.
          */
          
-         
-        
          if(character[0] != "") {
             //call the game
-            // console.log("call the game");
             render();
             update(dt);
+            
+            
          } else {
             //go to intro screen
             reset();
-         }
-            
+         }   
 
         /* Set our lastTime variable which is used to determine the time delta
          * for the next time this function is called.
@@ -107,7 +99,6 @@ var Engine = (function(global) {
      * game loop.
      */
     function init() {
-        //canvasIntro.addEventListener('click', onclick, false);
 
         reset();
         lastTime = Date.now();
@@ -128,9 +119,7 @@ var Engine = (function(global) {
         updateEntities(dt);
         checkCollisions();
         checkGemCatch();
-        checkReachWater();
-        
-
+        gameEnd = checkPlayerWin();
     }
 
     /* This is called by the update function and loops through all of the
@@ -141,7 +130,6 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
-
             allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
@@ -161,8 +149,10 @@ var Engine = (function(global) {
          * for that particular row of the game level.
          */
         $("#canvasIntro").remove();
-        $("#scorePlace").css('visibility', 'visible');
-        doc.body.appendChild(canvas);
+        $("#score-place").css('visibility', 'visible');
+        let game = doc.getElementById("canvas-game");
+        game.appendChild(canvas);
+    
         var rowImages = [
                 'images/water-block.png',   // Top row is water
                 'images/stone-block.png',   // Row 1 of 3 of stone
@@ -191,8 +181,10 @@ var Engine = (function(global) {
                 ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
             }
         }
-
-        renderEntities();
+        if(!gameEnd) {
+            renderEntities();
+        }
+        
     }
 
     /* This function is called by the render function and is called on each game
@@ -214,16 +206,18 @@ var Engine = (function(global) {
         
     }
 
-    /* This function does nothing but it could have been a good place to
-     * handle game reset states - maybe a new game menu or a game over screen
-     * those sorts of things. It's only called once by the init() method.
+    /* This function call the Initial game screen where the player can be chosen. 
+     * It's only called once by the init() method.
      */
     function reset() {
+        $("#score-place").css('visibility', 'hidden');
         resetScore();
-        $("#scorePlace").css('visibility', 'hidden');
+        $("#score-place").css('visibility', 'hidden');
         win.cancelAnimationFrame(myReq);
         $("#canvas").remove();
-        doc.body.appendChild(canvasIntro);
+        let game = doc.getElementById("canvas-game");
+        game.appendChild(canvasIntro);
+        
         var rowImages = [
                 'images/water-block.png',   // Top row is water
                 'images/stone-block.png',   // Row 1 of 3 of stone
@@ -266,6 +260,7 @@ var Engine = (function(global) {
                 ctxIntro.drawImage(Resources.get(rowCharacters[col]), col * 101, 5 * 75);
         }
 
+        //set the text to choose the player character
         ctxIntro.fillStyle = "black";
         ctxIntro.strokeStyle = "white"; 
         ctxIntro.lineWidth = 1; 
@@ -274,8 +269,6 @@ var Engine = (function(global) {
         ctxIntro.fillText("Choose your character:",253,230);
         ctxIntro.strokeText("Choose your character:",253,230);
         selector.render();
-
-        
         
     }
 
@@ -309,5 +302,6 @@ var Engine = (function(global) {
     global.ctx = ctx;
     global.ctxIntro = ctxIntro;
     global.character = character;
+    global.gameEnd = false;
    
 })(this);

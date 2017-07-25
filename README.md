@@ -1,6 +1,26 @@
-frontend-nanodegree-arcade-game
-===============================
+# Classic Arcade Game Clone
 
-Students should use this [rubric](https://review.udacity.com/#!/projects/2696458597/rubric) for self-checking their submission. Make sure the functions you write are **object-oriented** - either class functions (like Player and Enemy) or class prototype functions such as Enemy.prototype.checkCollisions, and that the keyword 'this' is used appropriately within your class and class prototype functions to refer to the object the function is called upon. Also be sure that the **readme.md** file is updated with your instructions on both how to 1. Run and 2. Play your arcade game.
+## Getting Started
 
-For detailed instructions on how to get started, check out this [guide](https://docs.google.com/document/d/1v01aScPjSWCCWQLIpFqvg3-vXLH2e8_SZQKC8jNO0Dc/pub?embedded=true).
+These instructions will get you a copy of the project up and running on your local machine.
+
+### Running
+
+Run this project using any http server. 
+For example: Install  the http-server package from npm (http://jasonwatmore.com/post/2016/06/22/nodejs-setup-simple-http-server-local-web-server).
+Go to file directory and run: ` http-server`
+
+
+### Playing the game
+
+#### Game introductory screen
+
+In the first screen the player can select which character he wants to play with by moving the box to the right or to the left (using the arrows of the keyboard) and then pressing Enter.
+
+#### Game started
+
+To play the game press the keyboard arrows to go up, go down, go to the left or right. Avoid the enemies or you will lose points. Try catching the gems in the way. You will increase you points with them. When you reach the water you increase your score by 100 points! The player score is shown on the top of game screen.
+
+#### Rule to win
+
+Reach the water 5 times and you win the game!

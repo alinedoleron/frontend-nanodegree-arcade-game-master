@@ -1,3 +1,4 @@
+//The class selector is a black square used on Game Introductory screen to indicate which character the player wants to use.
 class selector {
     constructor() {
         this.initPosX = 5;
@@ -8,15 +9,16 @@ class selector {
         this.player = 'images/char-boy.png';
     }
 
+    //display the selector
     render(width = 90, height = 90) {
         ctxIntro.drawImage(Resources.get(this.sprite), this.x, this.y, width, height);
         this.renderPlayer();
 
     }
 
+    //display the character chosen and the orientation to start the game
     renderPlayer() {
-        
-        ctxIntro.drawImage(Resources.get(this.player), 200, 210);      
+        ctxIntro.drawImage(Resources.get(this.player), 200, 210);
         ctxIntro.fillStyle = "black";
         ctxIntro.strokeStyle = "blue"; 
         ctxIntro.lineWidth = 1; 
@@ -26,6 +28,7 @@ class selector {
         ctxIntro.strokeText("PRESS ENTER TO START",253,375);    
     }
 
+    //control the selector movement
     handleInput(keyCode) {       
         
         switch(keyCode) {
@@ -52,6 +55,7 @@ class selector {
         this.checkCharacter(this.x);
     }
 
+    //selects the character
     checkCharacter(x) {
         let characters = ['images/char-boy.png', 'images/char-cat-girl.png', 'images/char-horn-girl.png',
                 'images/char-pink-girl.png', 'images/char-princess-girl.png'];
